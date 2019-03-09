@@ -63,7 +63,7 @@
 								<th>{{ $book->publishedDate }}</th>
 								<th>
 									@foreach($book->categories as $bookCategory)
-										{{ $bookCategory->name }}, 
+										{{ ($loop->last) ? $bookCategory->name . '' : $bookCategory->name . ', ' }}
 									@endforeach
 								</th>
 								<th>{{ isset($book->user->name) ? $book->user->name : '--' }}</th>

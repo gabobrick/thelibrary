@@ -6,39 +6,45 @@ trait CustomQueryBuilder
 {
 	public function scopeFilter($query)
 	{
-		return $this->process($query, request()->all());
+		return $this->process($query, array_filter(request()->all()));
 	}
 
-	public function process($query, $data)
+	public function process($query, $filters)
 	{
-		foreach($data as $filter => $value)
+		foreach($filters as $filter => $value)
 		{
 			if(isset($value) && $filter != 'page')
 			{
-				$array = [$filter, $value];
-				$this->makeFilter($query, $array);
+				$data = [$filter, $value];
+				$this->makeFilter($query, $data);
 			}
 		}
 	}
 
-	protected function makeFilter($query, $array)
+	protected function makeFilter($query, $data)
 	{
-		$this->{camel_case($array[0])}($array, $query);
+		$this->{camel_case($data[0])}($data, $query);
 	}
 
-	public function userId($array, $query)
+	public function userId($data, $query)
 	{
-		return $query->where($array[0], $array[1]);
+		return $query->where($data[0], $data[1]);
 	}
 
-	public function categoryId($array, $query)
+	public function categoryId($data, $query)
 	{
-		//return $query->where($array[0], $array[1]);
-		return $query->with('categories');
+		return $query->with('categories')->whereHas('categories', function($q) use($data){
+			$q->where($data[0], $data[1]);
+		});
+		/*
+		return $query->with(array('categories' => function($q) use($data){
+			$q->wherePivot($data[0], $data[1]);
+		}));
+		*/
 	}
 
-	public function bookName($array, $query)
+	public function bookName($data, $query)
 	{
-		return $query->where('name', $array[1]);
+		return $query->where('name', $data[1]);
 	}
 }

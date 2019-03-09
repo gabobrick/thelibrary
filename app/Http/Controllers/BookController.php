@@ -21,9 +21,10 @@ class BookController extends Controller
      */
     public function index()
     {
+        $requestFilter = array_filter(request()->all());
         $categories = Category::all();
         $users = User::all();
-        $books = Book::filter()->paginate(10)->appends('category_id', request()->category_id)->appends('book_name', request()->book_name)->appends('user_id', request()->user_id);
+        $books = Book::filter()->orderBy('created_at', 'desc')->paginate(10)->appends($requestFilter);
         return view('books.index', compact('books', 'categories', 'users'));
     }
 
@@ -100,7 +101,7 @@ class BookController extends Controller
 
         foreach($request->category_id as $category)
         {
-            $book->categories()->attach($request->category_id);
+            $book->categories()->attach($category);
         }
 
         return redirect('/');

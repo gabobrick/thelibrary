@@ -38,7 +38,7 @@
 
 						<div id="dynamic_field" class="col-md-6">
 							@foreach($book->categories as $bookCategory)
-								<select id="category_id{{ $loop->iteration - 1 }}" name="category_id[{{ $loop->iteration }}]" class="form-control{{ $errors->has('category_id') ? ' is-invalid' : '' }}">
+								<select id="category_id{{ $loop->iteration - 1 }}" name="category_id[{{ $loop->iteration - 1 }}]" class="form-control{{ $errors->has('category_id') ? ' is-invalid' : '' }}">
 									<option  value="">Select a category</option>
 									@foreach($categories as $category)
 										<option value="{{ $category->id }}" @if($bookCategory->id == $category->id)selected="selected"@endif>{{ $category->id }} - {{ $category->name }}</option>
