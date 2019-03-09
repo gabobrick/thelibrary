@@ -26,7 +26,7 @@ Open your `.env` file and change the database name (`DB_DATABASE`) to whatever y
 
 Run `php artisan key:generate`
 
-Run `php artisan migrate`
+Run `php artisan migrate --seed`
 
 Run `php artisan serve`
 
