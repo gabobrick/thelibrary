@@ -3,10 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Book;
+use App\Category;
+use App\User;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +21,10 @@ class BookController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Category::all();
+        $users = User::all();
+        $books = Book::filter()->paginate(10)->appends('category_id', request()->category_id)->appends('book_name', request()->book_name)->appends('user_id', request()->user_id);
+        return view('books.index', compact('books', 'categories', 'users'));
     }
 
     /**
@@ -24,7 +34,8 @@ class BookController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        return view('books.create', compact('categories'));
     }
 
     /**
@@ -35,18 +46,21 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $book = Book::create($request->validate([
+            'name' => ['required', 'min:3'],
+            'author' => ['required', 'min:3'],
+            'category_id.*' => ['required', 'integer'],
+            'publishedDate' => ['required', 'date']
+        ]));
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Book  $book
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Book $book)
-    {
-        //
+        foreach($request->category_id as $category)
+        {
+            $book->categories()->attach($category);
+        }
+
+        //$book->categories()->attach($request->category_id);
+
+        return redirect('/');
     }
 
     /**
@@ -57,7 +71,8 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        //
+        $categories = Category::all();
+        return view('books.edit', compact('book'), compact('categories'));
     }
 
     /**
@@ -69,7 +84,34 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book)
     {
-        //
+        $attributes = $request->validate([
+            'name' => ['required', 'min:3'],
+            'author' => ['required', 'min:3'],
+            'category_id.*' => ['required', 'integer'],
+            'publishedDate' => ['required', 'date']
+        ]);
+
+        $book->update($attributes);
+
+        foreach($book->categories as $category)
+        {
+            $book->categories()->detach($category->id);
+        }
+
+        foreach($request->category_id as $category)
+        {
+            $book->categories()->attach($request->category_id);
+        }
+
+        return redirect('/');
+    }
+
+    public function status(Request $request, Book $book)
+    {
+        $book->user_id = ($book->user_id) ? null : auth()->id();
+        $book->save();
+
+        return back();
     }
 
     /**
@@ -80,6 +122,8 @@ class BookController extends Controller
      */
     public function destroy(Book $book)
     {
-        //
+        $book->categories()->detach($book->category_id);
+        $book->delete();
+        return back();
     }
 }

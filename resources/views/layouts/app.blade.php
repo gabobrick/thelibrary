@@ -17,7 +17,9 @@
     <link rel="stylesheet" href="{{ asset('css/bootstrap-combobox.css') }}" type="text/css">
 </head>
 <body>
-    <div class="container">
+    @include('layouts.navbar')
+
+    <div class="container" style="margin-top: 1em;">
         @yield('content')
     </div>
 </body>
