@@ -21,10 +21,9 @@ class BookController extends Controller
      */
     public function index()
     {
-        $requestFilter = array_filter(request()->all());
         $categories = Category::all();
         $users = User::all();
-        $books = Book::filter()->orderBy('created_at', 'desc')->paginate(10)->appends($requestFilter);
+        $books = Book::filter()->orderBy('created_at', 'desc')->paginate(10)->appends(array_filter(request()->all()));
         return view('books.index', compact('books', 'categories', 'users'));
     }
 
@@ -54,12 +53,7 @@ class BookController extends Controller
             'publishedDate' => ['required', 'date']
         ]));
 
-        foreach($request->category_id as $category)
-        {
-            $book->categories()->attach($category);
-        }
-
-        //$book->categories()->attach($request->category_id);
+        $book->categories()->sync($request->category_id);
 
         return redirect('/');
     }
@@ -94,15 +88,7 @@ class BookController extends Controller
 
         $book->update($attributes);
 
-        foreach($book->categories as $category)
-        {
-            $book->categories()->detach($category->id);
-        }
-
-        foreach($request->category_id as $category)
-        {
-            $book->categories()->attach($category);
-        }
+        $book->categories()->sync($request->category_id);
 
         return redirect('/');
     }
@@ -123,7 +109,7 @@ class BookController extends Controller
      */
     public function destroy(Book $book)
     {
-        $book->categories()->detach($book->category_id);
+        $book->categories()->detach();
         $book->delete();
         return back();
     }

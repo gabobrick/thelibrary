@@ -36,15 +36,10 @@ trait CustomQueryBuilder
 		return $query->with('categories')->whereHas('categories', function($q) use($data){
 			$q->where($data[0], $data[1]);
 		});
-		/*
-		return $query->with(array('categories' => function($q) use($data){
-			$q->wherePivot($data[0], $data[1]);
-		}));
-		*/
 	}
 
 	public function bookName($data, $query)
 	{
-		return $query->where('name', $data[1]);
+		return $query->where('name', 'LIKE', '%'.$data[1].'%');
 	}
 }
